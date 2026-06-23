@@ -75,10 +75,23 @@ const sub = isEn
 </style>
 
 <script>
-  const hero = document.getElementById('hero');
-  const hand = hero?.querySelector('.hand') as HTMLElement | null;
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (hero && hand && !reduce) {
+  function setupHero() {
+    const hero = document.getElementById('hero');
+    const hand = hero?.querySelector('.hand') as HTMLElement | null;
+    if (!hero || !hand) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let seen = false;
+    try { seen = sessionStorage.getItem('mox.intro') === '1'; } catch {}
+    // The slogan/sub/cta/editor are hidden pre-paint (for the intro). If we're NOT playing
+    // the intro, reveal them instantly so the banner isn't blank.
+    const reveal = () => hero.querySelectorAll<HTMLElement>('.ch, .sub, .cta-row, .editor-wrap')
+      .forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; el.style.clipPath = 'none'; });
+    // reduce-motion: CSS already keeps it visible. Already seen this session: show directly.
+    if (reduce) return;
+    if (seen) { reveal(); return; }
+    // Play the centered-write intro once per session.
+    try { sessionStorage.setItem('mox.intro', '1'); } catch {}
+
     const wide = window.innerWidth >= 880;
     if (wide) {
       // FLIP: measure the slogan's resting (left) position, then offset it to screen centre.
@@ -94,4 +107,5 @@ const sub = isEn
     const writeMs = n * 160 + 450;
     window.setTimeout(() => hero.classList.add('settled'), writeMs + (wide ? 500 : 0));
   }
+  document.addEventListener('astro:page-load', setupHero);
 </script>

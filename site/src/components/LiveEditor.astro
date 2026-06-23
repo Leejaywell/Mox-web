@@ -77,8 +77,10 @@ const initial = isEn
 <script>
   import MarkdownIt from 'markdown-it';
 
-  const root = document.getElementById('live-editor');
-  if (root) {
+  function setupEditor() {
+    const root = document.getElementById('live-editor');
+    if (!root || root.dataset.ready) return; // fresh element each navigation; guard re-init
+    root.dataset.ready = '1';
     const md = new MarkdownIt({ html: false, linkify: true, breaks: false });
     const body = root.querySelector('.le-body') as HTMLElement;
     const wys = root.querySelector('.wysiwyg') as HTMLElement;
@@ -136,4 +138,5 @@ const initial = isEn
       io.observe(root);
     }
   }
+  document.addEventListener('astro:page-load', setupEditor);
 </script>

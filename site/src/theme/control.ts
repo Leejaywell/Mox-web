@@ -40,31 +40,45 @@ export function applyTheme(id: string) {
     el.classList.toggle('on', el.dataset.themeId === id));
 }
 
-export function initTheme() {
-  const canvas = document.getElementById('site-fx') as HTMLCanvasElement | null;
-  let saved: string | null = null;
-  try { saved = localStorage.getItem(KEY); } catch {}
-  saved = resolveId(saved); // migrate any old/renamed id
-  // Default theme is 绯夜 (waifu) unless the user picked one before.
-  const th = (saved ? getTheme(saved) : undefined) || getTheme('waifu');
+let effectStarted = false;
+let escWired = false;
 
-  if (canvas) {
-    fx = new AmbientEffect(canvas, {
-      type: th?.effect || 'orbs',
-      colors: th?.effectColors || ['#ff5c8a', '#c04fff', '#7b5cff'],
-    });
-    fx.start();
+/** Runs on initial load AND after every view-transition navigation (astro:page-load).
+ * The effect canvas is persisted across navigations, so it's created only once; the
+ * theme panel is re-rendered each page, so its listeners are (re)bound every time. */
+export function setupTheme() {
+  // One-time: bind the ambient effect to the persisted canvas and apply the saved theme.
+  if (!effectStarted) {
+    const canvas = document.getElementById('site-fx') as HTMLCanvasElement | null;
+    if (canvas) {
+      let saved: string | null = null;
+      try { saved = localStorage.getItem(KEY); } catch {}
+      saved = resolveId(saved); // migrate any old/renamed id
+      const th = (saved ? getTheme(saved) : undefined) || getTheme('waifu');
+      fx = new AmbientEffect(canvas, {
+        type: th?.effect || 'orbs',
+        colors: th?.effectColors || ['#ff5c8a', '#c04fff', '#7b5cff'],
+      });
+      fx.start();
+      if (th) applyTheme(th.id);
+      effectStarted = true;
+    }
   }
-  if (th) applyTheme(th.id);
 
-  // Centered modal open/close.
+  // Per-page: (re)wire the theme panel (fresh DOM each navigation). Property assignment is
+  // idempotent on fresh nodes, so no listener stacking.
   const panel = document.getElementById('theme-panel');
-  const openBtn = document.getElementById('theme-open');
-  openBtn?.addEventListener('click', (e) => { e.preventDefault(); panel?.classList.toggle('open'); });
-  panel?.addEventListener('click', (e) => { if (e.target === panel) panel.classList.remove('open'); }); // click dim backdrop
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') panel?.classList.remove('open'); });
-
-  // Swatch clicks.
-  document.querySelectorAll<HTMLElement>('[data-theme-id]').forEach((el) =>
-    el.addEventListener('click', () => { applyTheme(el.dataset.themeId!); }));
+  const openBtn = document.getElementById('theme-open') as HTMLElement | null;
+  if (openBtn) openBtn.onclick = (e) => { e.preventDefault(); panel?.classList.toggle('open'); };
+  if (panel) panel.onclick = (e) => { if (e.target === panel) panel.classList.remove('open'); };
+  document.querySelectorAll<HTMLElement>('[data-theme-id]').forEach((el) => {
+    el.onclick = () => applyTheme(el.dataset.themeId!);
+  });
+  // document-level Esc: persists across navigations, so bind once.
+  if (!escWired) {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.getElementById('theme-panel')?.classList.remove('open');
+    });
+    escWired = true;
+  }
 }

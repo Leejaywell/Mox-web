@@ -67,9 +67,12 @@ const timeline = withBase(isEn ? '/en/timeline' : '/timeline');
   import HanziWriter from 'hanzi-writer';
   import moData from '@/data/mo-char.json';
 
-  const target = document.getElementById('nav-mo');
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (target) {
+  let moTimer: number | undefined;
+  function setupNavInk() {
+    const target = document.getElementById('nav-mo');
+    if (!target || target.dataset.inked) return; // nav is re-rendered per page; guard re-init
+    target.dataset.inked = '1';
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const writer = HanziWriter.create(target, '墨', {
       width: 26, height: 26, padding: 1,
       showOutline: false, showCharacter: false,
@@ -79,8 +82,10 @@ const timeline = withBase(isEn ? '/en/timeline' : '/timeline');
     writer.showCharacter();      // always visible immediately (no blank badge)
     if (!reduce) {
       setTimeout(() => writer.animateCharacter(), 600);
-      setInterval(() => writer.animateCharacter(), 9000);   // periodic re-trace
+      if (moTimer) clearInterval(moTimer);
+      moTimer = window.setInterval(() => writer.animateCharacter(), 9000);
     }
   }
+  document.addEventListener('astro:page-load', setupNavInk);
 </script>
 

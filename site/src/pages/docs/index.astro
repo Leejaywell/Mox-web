@@ -59,17 +59,26 @@ import Base from '@/layouts/Base.astro';
 <script>
   import MarkdownIt from 'markdown-it';
 
-  const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
-  const root = document.getElementById('docs')!;
-  const BASE = root.dataset.base || '/';
-  const navEl = document.getElementById('docs-nav')!;
-  const contentEl = document.getElementById('docs-content')!;
-  const tocEl = document.getElementById('docs-toc')!;
-  const searchEl = document.getElementById('docs-search') as HTMLInputElement;
-
   type Item = { slug: string; title: string };
   type Group = { group: string; items: Item[] };
+  const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
   let manifest: Record<string, Group[]> = {};
+  let hashHandler: (() => void) | null = null;
+  let currentRoute: () => void = () => {}; // latest page's route(), for popstate/hashchange
+
+  // Re-initialized on every navigation to /docs (the DOM is swapped by view transitions).
+  async function setupDocs() {
+    const root = document.getElementById('docs');
+    if (!root) { // left the docs page — drop the stale hash listener
+      if (hashHandler) { window.removeEventListener('hashchange', hashHandler); hashHandler = null; }
+      return;
+    }
+    const BASE = root.dataset.base || '/';
+    const navEl = document.getElementById('docs-nav')!;
+    const contentEl = document.getElementById('docs-content')!;
+    const tocEl = document.getElementById('docs-toc')!;
+    const searchEl = document.getElementById('docs-search') as HTMLInputElement;
+    let first = true;
 
   function parseHash() {
     const m = location.hash.match(/^#\/(zh|en)\/([\w-]+)/);
@@ -98,7 +107,6 @@ import Base from '@/layouts/Base.astro';
     tocEl.innerHTML = parts.length ? `<p class="glabel">${parseHash().lang === 'en' ? 'On this page' : '本页目录'}</p>${parts.join('')}` : '';
   }
 
-  let first = true;
   async function route() {
     const { lang, slug } = parseHash();
     buildNav(lang, slug);
@@ -123,11 +131,28 @@ import Base from '@/layouts/Base.astro';
     });
   });
 
-  async function init() {
-    manifest = await (await fetch(`${BASE}docs/manifest.json`)).json();
+    if (!manifest.zh) {
+      manifest = await (await fetch(`${BASE}docs/manifest.json`)).json();
+    }
     if (!location.hash) location.hash = '#/zh/getting-started';
+    currentRoute = route;
     await route();
-    window.addEventListener('hashchange', route);
+    // The view-transition router intercepts in-page `#/...` links and suppresses `hashchange`,
+    // so handle docs-route clicks ourselves in the capture phase (runs before the router).
+    navEl.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest('a[href^="#/"]') as HTMLAnchorElement | null;
+      if (!a) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const href = a.getAttribute('href')!;
+      if (location.hash !== href) { history.pushState(null, '', href); route(); }
+    }, true);
+    // Back/forward + any real hashchange → re-route. Window-level, so bind once.
+    if (!hashHandler) {
+      hashHandler = () => currentRoute();
+      window.addEventListener('popstate', hashHandler);
+      window.addEventListener('hashchange', hashHandler);
+    }
   }
-  init();
+  document.addEventListener('astro:page-load', setupDocs);
 </script>
