@@ -31,7 +31,7 @@ const initial = isEn
 <style is:global>
   /* #live-editor scope; is:global because rendered markdown is injected via innerHTML. */
   #live-editor.le { border-radius: 14px; overflow: hidden; background: var(--card);
-    border: 1px solid var(--hairline); box-shadow: 0 30px 70px rgba(60,45,30,.16); display: flex; flex-direction: column; height: 460px; }
+    border: 1px solid var(--hairline); box-shadow: 0 30px 70px rgba(60,45,30,.16); display: flex; flex-direction: column; height: clamp(440px, 64vh, 600px); }
   #live-editor .le-bar { display: flex; align-items: center; gap: 14px; padding: 11px 14px;
     border-bottom: 1px solid var(--hairline); background: color-mix(in srgb, var(--fg) 3%, transparent); }
   #live-editor .dots { display: flex; gap: 7px; }
