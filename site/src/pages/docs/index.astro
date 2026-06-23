@@ -33,6 +33,8 @@ import Base from '@/layouts/Base.astro';
   #docs .toc a.h3 { padding-left: 12px; }
   #docs .toc a:hover { color: var(--fg); }
 
+  #docs .content { transition: opacity .26s ease, transform .26s ease; }
+  #docs .content.swapping { opacity: 0; transform: translateY(8px); }
   #docs .prose { line-height: 1.8; max-width: 760px; }
   #docs .prose h1 { font-size: 34px; margin: 0 0 18px; }
   #docs .prose h2 { font-size: 24px; margin: 40px 0 12px; padding-top: 8px; }
@@ -96,17 +98,22 @@ import Base from '@/layouts/Base.astro';
     tocEl.innerHTML = parts.length ? `<p class="glabel">${parseHash().lang === 'en' ? 'On this page' : '本页目录'}</p>${parts.join('')}` : '';
   }
 
+  let first = true;
   async function route() {
     const { lang, slug } = parseHash();
     buildNav(lang, slug);
+    let html = '<h1>404</h1>';
     try {
       const res = await fetch(`${BASE}docs/${lang}/${slug}.md`);
-      contentEl.innerHTML = res.ok ? md.render(await res.text()) : '<h1>404</h1>';
-    } catch {
-      contentEl.innerHTML = '<h1>404</h1>';
+      if (res.ok) html = md.render(await res.text());
+    } catch { /* keep 404 */ }
+    const swap = () => { contentEl.innerHTML = html; buildToc(); requestAnimationFrame(() => contentEl.classList.remove('swapping')); };
+    if (first) { first = false; contentEl.innerHTML = html; buildToc(); }
+    else {
+      contentEl.classList.add('swapping');           // fade/slide out, then swap + fade in
+      window.setTimeout(swap, 200);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    buildToc();
-    contentEl.scrollIntoView({ block: 'start' });
   }
 
   searchEl.addEventListener('input', () => {

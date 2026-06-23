@@ -37,14 +37,11 @@ export function initTheme() {
   }
   if (th) applyTheme(th.id);
 
-  // Panel open/close.
+  // Centered modal open/close.
   const panel = document.getElementById('theme-panel');
   const openBtn = document.getElementById('theme-open');
   openBtn?.addEventListener('click', (e) => { e.preventDefault(); panel?.classList.toggle('open'); });
-  document.addEventListener('click', (e) => {
-    const t = e.target as Node;
-    if (panel?.classList.contains('open') && !panel.contains(t) && !openBtn?.contains(t)) panel.classList.remove('open');
-  });
+  panel?.addEventListener('click', (e) => { if (e.target === panel) panel.classList.remove('open'); }); // click dim backdrop
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') panel?.classList.remove('open'); });
 
   // Swatch clicks.
