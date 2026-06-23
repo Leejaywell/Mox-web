@@ -5,7 +5,9 @@ import { defineConfig } from 'astro/config';
 // full project URL + base path); defaults are fine for Vercel/Netlify root deploys.
 export default defineConfig({
   site: process.env.SITE_URL || 'https://mox.app',
-  base: process.env.BASE_PATH || '/',
+  // Always end with a slash so import.meta.env.BASE_URL joins cleanly (GitHub Pages
+  // passes base_path WITHOUT a trailing slash, e.g. "/Mox-web").
+  base: (process.env.BASE_PATH || '/').replace(/\/?$/, '/'),
   output: 'static',
   i18n: {
     defaultLocale: 'zh',
