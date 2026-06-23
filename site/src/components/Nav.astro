@@ -10,7 +10,7 @@ const other = locale === 'en' ? '/' : '/en';
     <div class="links">
       <a href="#features">{t(locale, 'nav.features')}</a>
       <a href="#themes">{t(locale, 'nav.themes')}</a>
-      <a href="/docs">{t(locale, 'nav.docs')}</a>
+      <a class="doc-link" href="/docs">{t(locale, 'nav.docs')}</a>
       <a class="lang" href={other}>{locale === 'en' ? '中' : 'EN'}</a>
       <a class="dl" href="https://github.com/Leejaywell/Mox/releases/latest">{t(locale, 'nav.download')}</a>
     </div>
@@ -29,6 +29,6 @@ const other = locale === 'en' ? '/' : '/en';
   .dl:hover { filter: brightness(1.08); color: #fff; }
   @media (max-width: 640px) {
     .links { gap: 12px; font-size: 13px; }
-    .links a:not(.dl):not(.lang) { display: none; }
+    .links a:not(.dl):not(.lang):not(.doc-link) { display: none; }
   }
 </style>

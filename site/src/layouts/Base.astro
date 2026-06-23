@@ -5,6 +5,10 @@ import Footer from '@/components/Footer.astro';
 import { localeFromPath } from '@/i18n';
 const { title, description } = Astro.props as { title: string; description?: string };
 const locale = localeFromPath(Astro.url.pathname);
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const zhHref = new URL(Astro.url.pathname.replace(/^\/en\/?/, '/'), Astro.site).href;
+const enPath = Astro.url.pathname.startsWith('/en') ? Astro.url.pathname : '/en' + (Astro.url.pathname === '/' ? '' : Astro.url.pathname);
+const enHref = new URL(enPath, Astro.site).href;
 ---
 <!doctype html>
 <html lang={locale === 'en' ? 'en' : 'zh'}>
@@ -13,8 +17,14 @@ const locale = localeFromPath(Astro.url.pathname);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="zh" href={zhHref} />
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="x-default" href={zhHref} />
+    <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
     <meta name="theme-color" content="#0c0a18" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
