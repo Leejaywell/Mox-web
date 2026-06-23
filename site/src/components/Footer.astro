@@ -2,9 +2,10 @@
 import { t, type Locale } from '@/i18n';
 import { withBase } from '@/lib/url';
 const { locale } = Astro.props as { locale: Locale };
-const other = withBase(locale === 'en' ? '/' : '/en');
+const other = withBase(locale === 'en' ? '/' : '/en/');
 const home = withBase(locale === 'en' ? '/en/' : '/');
-const docs = withBase('/docs') + (locale === 'en' ? '#/en/getting-started' : '');
+// Trailing slash: GitHub Pages redirects `/docs` → `/docs/` and drops the hash.
+const docs = withBase('/docs/') + (locale === 'en' ? '#/en/getting-started' : '');
 ---
 <footer class="footer">
   <div class="container foot-inner">

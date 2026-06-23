@@ -7,9 +7,11 @@ const home = withBase(isEn ? '/en/' : '/');
 // 功能/下载 are sections on the HOME page, so link to home + hash (works from any page).
 const features = home + '#features';
 const download = home + '#download';
-const docs = withBase('/docs') + (isEn ? '#/en/getting-started' : '');
-const faq = withBase('/docs') + (isEn ? '#/en/faq' : '#/zh/faq');
-const timeline = withBase(isEn ? '/en/timeline' : '/timeline');
+// Trailing slash matters: GitHub Pages 301-redirects `/docs` → `/docs/` and DROPS the
+// hash, so `/docs#/zh/faq` lands on the default doc. Link the canonical `/docs/` directly.
+const docs = withBase('/docs/') + (isEn ? '#/en/getting-started' : '');
+const faq = withBase('/docs/') + (isEn ? '#/en/faq' : '#/zh/faq');
+const timeline = withBase(isEn ? '/en/timeline/' : '/timeline/');
 ---
 <nav class="nav">
   <div class="container nav-inner">

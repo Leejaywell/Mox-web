@@ -4,7 +4,8 @@ import { withBase } from '@/lib/url';
 const { locale } = Astro.props as { locale: Locale };
 const L = (zh: string, en: string) => (locale === 'en' ? en : zh);
 const RELEASE = 'https://github.com/jay-jasper/Mox-web/releases/latest';
-const faq = withBase('/docs') + (locale === 'en' ? '#/en/faq' : '#/zh/faq');
+// Trailing slash: GitHub Pages redirects `/docs` → `/docs/` and drops the hash.
+const faq = withBase('/docs/') + (locale === 'en' ? '#/en/faq' : '#/zh/faq');
 ---
 <section id="download" class="cta-band">
   <div class="container" data-reveal>
