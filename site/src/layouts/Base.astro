@@ -2,6 +2,7 @@
 import '@/styles/global.css';
 import Nav from '@/components/Nav.astro';
 import Footer from '@/components/Footer.astro';
+import ThemePanel from '@/components/ThemePanel.astro';
 import { localeFromPath } from '@/i18n';
 const { title, description } = Astro.props as { title: string; description?: string };
 const locale = localeFromPath(Astro.url.pathname);
@@ -25,16 +26,19 @@ const enHref = new URL(enPath, Astro.site).href;
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:url" content={canonical} />
-    <meta name="theme-color" content="#0c0a18" />
+    <meta name="theme-color" content="#f4eee2" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Liu+Jian+Mao+Cao&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Liu+Jian+Mao+Cao&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
+    <div class="site-bg"></div>
+    <canvas id="site-fx" class="site-fx"></canvas>
     <Nav locale={locale} />
+    <ThemePanel locale={locale} />
     <main><slot /></main>
     <Footer locale={locale} />
     <script>
@@ -45,6 +49,10 @@ const enHref = new URL(enPath, Astro.site).href;
         }
       }, { threshold: 0.15 });
       document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+    </script>
+    <script>
+      import { initTheme } from '@/theme/control';
+      initTheme();
     </script>
   </body>
 </html>

@@ -1,22 +1,38 @@
 :root {
-  --bg: #0c0a18;
-  --fg: #e8e8ea;
-  --muted: #a0a0ad;
-  --accent: #5b8cff;
-  --hairline: color-mix(in srgb, var(--fg) 12%, transparent);
-  --serif: Georgia, "Songti SC", "Noto Serif SC", serif;
-  --sans: -apple-system, system-ui, "PingFang SC", "Noto Sans SC", sans-serif;
-  --maxw: 1080px;
+  /* Base theme (warm "paper", zditor-inspired). The theme controller overrides
+     --bg / --fg / --accent at runtime; everything else derives from them. */
+  --bg: #f4eee2;
+  --fg: #2b2620;
+  --accent: #6b5236;
+
+  --text: color-mix(in srgb, var(--fg) 86%, var(--bg));
+  --muted: color-mix(in srgb, var(--fg) 52%, var(--bg));
+  --card: color-mix(in srgb, var(--bg) 90%, var(--fg));
+  --bg-soft: color-mix(in srgb, var(--bg) 95%, var(--fg));
+  --hairline: color-mix(in srgb, var(--fg) 14%, transparent);
+  --btn: var(--accent);
+  --btn-fg: var(--bg);
+  --green: #5b9d6a;
+  --sans: "Inter", -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --serif: "Songti SC", "Noto Serif SC", Georgia, serif;
+  --hand-zh: "Liu Jian Mao Cao", cursive;
+  --hand-en: "Dancing Script", cursive;
+  --maxw: 1180px;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: transparent; color: var(--text); font-family: var(--sans); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* Fixed site-wide background + ambient effect (driven by the global theme). */
+.site-bg { position: fixed; inset: 0; z-index: -2; background: var(--bg); transition: background .5s ease; }
+.site-fx { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; opacity: .55; pointer-events: none; }
+
 a { color: inherit; text-decoration: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-::selection { background: color-mix(in srgb, var(--accent) 40%, transparent); }
-h1, h2, h3 { font-family: var(--serif); }
+::selection { background: color-mix(in srgb, var(--accent) 26%, transparent); }
+h1, h2, h3 { font-family: var(--sans); font-weight: 800; color: var(--fg); letter-spacing: -0.01em; }
 img { max-width: 100%; display: block; }
-.container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; width: 100%; }
+.container { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; width: 100%; }
 [data-reveal] { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
 [data-reveal].in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {

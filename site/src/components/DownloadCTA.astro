@@ -3,7 +3,7 @@ import { t, type Locale } from '@/i18n';
 const { locale } = Astro.props as { locale: Locale };
 const L = (zh: string, en: string) => (locale === 'en' ? en : zh);
 ---
-<section class="cta-band">
+<section id="download" class="cta-band">
   <div class="container" data-reveal>
     <h2>{L('现在开始，优雅书写', 'Start writing, beautifully')}</h2>
     <p>{L('免费下载，原生 macOS 体验。', 'Free download. A truly native macOS experience.')}</p>
