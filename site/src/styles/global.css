@@ -34,6 +34,14 @@ a { color: inherit; text-decoration: none; }
 h1, h2, h3 { font-family: var(--sans); font-weight: 800; color: var(--fg); letter-spacing: -0.01em; }
 img { max-width: 100%; display: block; }
 .container { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; width: 100%; }
+/* Homepage intro: while the slogan writes itself, the rest of the UI (nav/header, scroll cue,
+   footer) is hidden so the animation has a clean stage. `playing-intro` is set pre-paint by the
+   inline head script and cleared by the hero script once the slogan settles. */
+.nav, .footer, .scroll-cue { transition: opacity .5s ease; }
+html.playing-intro .nav,
+html.playing-intro .footer,
+html.playing-intro .scroll-cue { opacity: 0; pointer-events: none; }
+
 /* Gate the hidden state on html.js so content is always visible if JS doesn't run. */
 html.js [data-reveal] { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
 html.js [data-reveal].in { opacity: 1; transform: none; }

@@ -6,7 +6,7 @@ import ThemePanel from '@/components/ThemePanel.astro';
 import { withBase } from '@/lib/url';
 import { ViewTransitions } from 'astro:transitions';
 import type { Locale } from '@/i18n';
-const { title, description } = Astro.props as { title: string; description?: string };
+const { title, description, hero } = Astro.props as { title: string; description?: string; hero?: boolean };
 // Locale + canonical/hreflang computed RELATIVE TO THE BASE PATH (e.g. "/Mox-web/"),
 // so they're correct both locally and on a GitHub Pages project page.
 const base = import.meta.env.BASE_URL;
@@ -20,7 +20,7 @@ const zhHref = new URL(base + zhRel, Astro.site).href;
 const enHref = new URL(base + enRel, Astro.site).href;
 ---
 <!doctype html>
-<html lang={locale === 'en' ? 'en' : 'zh'}>
+<html lang={locale === 'en' ? 'en' : 'zh'} data-hero={hero ? '' : undefined}>
   <head>
     <script is:inline>
       // Mark JS-on, and restore the saved theme palette BEFORE first paint (no FOUC of the
@@ -37,6 +37,17 @@ const enHref = new URL(base + enRel, Astro.site).href;
           } catch (e) {}
         }
         restore();
+        // Homepage intro: hide the chrome pre-paint when the slogan is about to write itself, so
+        // there's no flash of the nav before it animates. Mirrors the hero script's replay rule —
+        // keep the 60000ms (1 min) in sync with INTRO_REPLAY_MS there.
+        try {
+          var ts = +sessionStorage.getItem('mox.intro.ts') || 0;
+          if (document.documentElement.hasAttribute('data-hero')
+              && (Date.now() - ts) > 60000
+              && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('playing-intro');
+          }
+        } catch (e) {}
         // View-transition swaps copy root attributes from the incoming (un-themed) <html>,
         // wiping the inline palette + `js` class — restore after each swap, before paint.
         document.addEventListener('astro:after-swap', restore);

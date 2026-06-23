@@ -75,22 +75,33 @@ const sub = isEn
 </style>
 
 <script>
+  const INTRO_REPLAY_MS = 60_000; // replay the intro if 1+ min has passed (even in the same session)
+  function shouldPlayIntro() {
+    try {
+      const ts = Number(sessionStorage.getItem('mox.intro.ts')) || 0;
+      return Date.now() - ts > INTRO_REPLAY_MS; // 0 (never played) → always true
+    } catch { return true; }
+  }
   function setupHero() {
     const hero = document.getElementById('hero');
     const hand = hero?.querySelector('.hand') as HTMLElement | null;
     if (!hero || !hand) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let seen = false;
-    try { seen = sessionStorage.getItem('mox.intro') === '1'; } catch {}
+    const html = document.documentElement;
     // The slogan/sub/cta/editor are hidden pre-paint (for the intro). If we're NOT playing
-    // the intro, reveal them instantly so the banner isn't blank.
-    const reveal = () => hero.querySelectorAll<HTMLElement>('.ch, .sub, .cta-row, .editor-wrap')
-      .forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; el.style.clipPath = 'none'; });
-    // reduce-motion: CSS already keeps it visible. Already seen this session: show directly.
-    if (reduce) return;
-    if (seen) { reveal(); return; }
-    // Play the centered-write intro once per session.
-    try { sessionStorage.setItem('mox.intro', '1'); } catch {}
+    // the intro, reveal them instantly so the banner isn't blank — and drop the clean-stage class.
+    const reveal = () => {
+      html.classList.remove('playing-intro');
+      hero.querySelectorAll<HTMLElement>('.ch, .sub, .cta-row, .editor-wrap')
+        .forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; el.style.clipPath = 'none'; });
+    };
+    // reduce-motion: CSS already keeps it visible. Played recently this session: show directly.
+    if (reduce) { html.classList.remove('playing-intro'); return; }
+    if (!shouldPlayIntro()) { reveal(); return; }
+    // Play the centered-write intro on a clean stage (nav/cue/footer hidden via .playing-intro,
+    // set pre-paint on full loads; (re)assert here so in-session replays hide the chrome too).
+    try { sessionStorage.setItem('mox.intro.ts', String(Date.now())); } catch {}
+    html.classList.add('playing-intro');
 
     const wide = window.innerWidth >= 880;
     if (wide) {
@@ -105,7 +116,10 @@ const sub = isEn
     requestAnimationFrame(() => requestAnimationFrame(() => hero.classList.add('writing')));
     const n = hand.querySelectorAll('.ch').length;
     const writeMs = n * 160 + 450;
-    window.setTimeout(() => hero.classList.add('settled'), writeMs + (wide ? 500 : 0));
+    window.setTimeout(() => {
+      hero.classList.add('settled');
+      html.classList.remove('playing-intro'); // slogan has landed → fade the chrome back in
+    }, writeMs + (wide ? 500 : 0));
   }
   document.addEventListener('astro:page-load', setupHero);
 </script>
