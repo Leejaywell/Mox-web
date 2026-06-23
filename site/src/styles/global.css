@@ -1,9 +1,10 @@
 :root {
-  /* Base theme (warm "paper", zditor-inspired). The theme controller overrides
+  /* Default theme = 绯夜 (Crimson Night). The theme controller overrides
      --bg / --fg / --accent at runtime; everything else derives from them. */
-  --bg: #f4eee2;
-  --fg: #2b2620;
-  --accent: #6b5236;
+  color-scheme: dark;
+  --bg: #12121F;
+  --fg: #FFFFFF;
+  --accent: #E0568A;
 
   --text: color-mix(in srgb, var(--fg) 86%, var(--bg));
   --muted: color-mix(in srgb, var(--fg) 52%, var(--bg));

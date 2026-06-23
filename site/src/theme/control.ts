@@ -25,13 +25,13 @@ export function initTheme() {
   const canvas = document.getElementById('site-fx') as HTMLCanvasElement | null;
   let saved: string | null = null;
   try { saved = localStorage.getItem(KEY); } catch {}
-  const th = saved ? getTheme(saved) : undefined;
+  // Default theme is 绯夜 (waifu) unless the user picked one before.
+  const th = (saved ? getTheme(saved) : undefined) || getTheme('waifu');
 
   if (canvas) {
-    // Default (no saved theme) uses the base "paper" look with a soft mote effect.
     fx = new AmbientEffect(canvas, {
-      type: th?.effect || 'motes',
-      colors: th?.effectColors || ['#cfc8bd', '#b8b0a3'],
+      type: th?.effect || 'orbs',
+      colors: th?.effectColors || ['#ff5c8a', '#c04fff', '#7b5cff'],
     });
     fx.start();
   }
